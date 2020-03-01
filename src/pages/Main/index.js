@@ -1,76 +1,66 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as actions from "@/data/rootActions";
+import TrackingInfo from "@/pages/Main/TrackingInfo";
+import * as selectors from "@/data/rootSelectors";
+import Error from '@/components/Error';
 
 const Main = () => {
+	const [value, setValue] = useState('');
+	const dispatch = useDispatch();
+	const trackingInfo = useSelector(selectors.delivery.getDelivery);
+
+	const onChange = useCallback(e => {
+		setValue(e.target.value);
+	}, []);
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		const code = e.target.t_code.value;
+
+		dispatch(actions.delivery.getDelivery(code, value));
+		document.getElementById('form').reset();
+		setValue('');
+
+	}
+
+	useEffect(() => {
+		console.log('trackingInfo:', trackingInfo);
+	}, [trackingInfo])
+
 	return (
 		<>
 			<section id="container">
 				<article id="searchContent">
 					<div className="area">
 						<h2>배송 조회</h2>
-
-						<ul>
-							<li><input type="radio" name="" id="" /> <label htmlFor="">한진택배</label></li>
-							<li><input type="radio" name="" id="" /> <label htmlFor="">경동택배</label></li>
-							<li><input type="radio" name="" id="" /> <label htmlFor="">CJ대한통운</label></li>
-						</ul>
-						<div className="search-area">
-							<input type="text" placeholder="운송장번호" />
-							<button value="">검색</button>
-						</div>
-
+						<form id="form" onSubmit={handleSubmit}>
+							<ul>
+								<li><input type="radio" name="t_code" value="05" id="t_code_05" /> <label htmlFor="t_code_05">한진택배</label></li>
+								<li><input type="radio" name="t_code" value="23" id="t_code_23" /> <label htmlFor="t_code_23">경동택배</label></li>
+								<li><input type="radio" name="t_code" value="04" id="t_code_04" /> <label htmlFor="t_code_04">CJ대한통운</label></li>
+							</ul>
+							<div className="search-area">
+								<input
+									type="text"
+									name="t_invoice"
+									placeholder="운송장번호"
+									value={value}
+									onChange={onChange}
+								/>
+								<button type="submit">검색</button>
+							</div>
+						</form>
 					</div>
 				</article>
 
-				<article id="searchResultContent" className="area">
-					<h2>기본정보</h2>
-					<table className="search-result-tbl">
-						<tr>
-							<th>운송장 번호</th>
-							<th>보내는 분</th>
-							<th>받는 분</th>
-							<th>상품 정보</th>
-							<th>처리현황</th>
-						</tr>
-						<tr>
-							<td>356883833504</td>
-							<td>㈜*</td>
-							<td>장*</td>
-							<td>배송상품</td>
-							<td>배송완료</td>
-						</tr>
-					</table>
-					<h2>배송현황</h2>
-					<table className="search-result-tbl">
-						<tr>
-							<th>날짜</th>
-							<th>장소</th>
-							<th>처리현황</th>
-						</tr>
-						<tr>
-							<td>2020-02-05 19:24:00</td>
-							<td>서울중앙우체국</td>
-							<td>집하완료</td>
-						</tr>
-						<tr>
-							<td>2020-02-05 19:25:00</td>
-							<td>서울중앙우체국</td>
-							<td>접수</td>
-						</tr>
-						<tr>
-							<td>2020-02-05 19:35:00</td>
-							<td>서울중앙우체국</td>
-							<td>발송</td>
-						</tr>
-					</table>
-				</article>
+				{trackingInfo.error && <Error msg={trackingInfo.error.msg} />}
+				{trackingInfo.trackingInfo.result === "Y" && <TrackingInfo trackingInfo={trackingInfo.trackingInfo} trackingDetail={trackingInfo.trackingDetail} />}
+
 			</section>
 			<style jsx>{`
 				ul, li {
 				list-style: none;
-				}
-				table {
-					border-collapse: collapse;
-					border-spacing: 0;
 				}
 				.area {
 					max-width: 1100px;
@@ -121,28 +111,7 @@ const Main = () => {
 					color: #fff;
 					font-size: 16px;
 				}
-				#searchResultContent {
-					padding:100px 0;
-				}
-				#searchResultContent h2 {
-					margin-bottom:10px;
-					font-size:24px;
-				}
-				.search-result-tbl {
-					width:100%;
-					border-top:2px solid #333;
-					margin-bottom: 10px;
-				}
-				.search-result-tbl th,
-				.search-result-tbl td {
-					padding:10px 0;
-					text-align: center;
-					border-bottom:1px solid #ddd;
-					font-size:15px;
-				}
-				.search-result-tbl th {
-					background-color: #f2f2f2;
-				}
+				
 			`}</style>
 		</>
 	);
